@@ -1,21 +1,45 @@
 package com.example.orders.config;
 
+import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.*;
+import org.springframework.retry.support.RetryTemplate;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
 @EnableKafka
 public class KafkaConfig {
+
+    @Value(value = "${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+
+    @Bean
+    public KafkaAdmin admin() {
+        Map<String, Object> configs = new HashMap<>();
+        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092");
+        return new KafkaAdmin(configs);
+    }
+
+    @Bean
+    public NewTopic newOrders() {
+       return TopicBuilder.name("new_orders")
+               .partitions(3)
+               .replicas(3)
+               .build();
+    }
 
     @Bean
     public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory) {
@@ -25,27 +49,41 @@ public class KafkaConfig {
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092");
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+
+
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> statusGroupKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConcurrency(3);
         factory.setConsumerFactory(statusGroupConsumerFactory());
+
         return factory;
     }
 
     @Bean
     public ConsumerFactory<String, String> statusGroupConsumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092");
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "statusGroup");
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+
         return new DefaultKafkaConsumerFactory<>(configProps);
+    }
+
+    // Exception handling . позже продолжу
+    private RetryTemplate retryTemplate() {
+        return RetryTemplate.builder()
+                .maxAttempts(3)  // Макс. число попыток
+                .fixedBackoff(1000)  // Интервал между попытками (мс)
+                .retryOn(IOException.class)  // Какие ошибки переотправлять
+                .build();
     }
 
 }
