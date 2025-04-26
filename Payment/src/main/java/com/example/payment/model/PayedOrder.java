@@ -1,12 +1,12 @@
 package com.example.payment.model;
 
-public class Order {
+public class PayedOrder {
 
     private Long id;
     private String name;
     private int count;
 
-    public Order() {
+    public PayedOrder() {
     }
 
     public Long getId() {

@@ -27,17 +27,19 @@ public class MyConsumer {
     }
 
     @KafkaListener(topics = "products_status", groupId = "statusGroup", containerFactory = "statusGroupKafkaListenerContainerFactory")
-    public void updateStatus(String jsonMessage) throws JsonProcessingException {
+    public void updateStatus(String jsonMessage) {
 
-        log.info("OrderService listen changed object by product_status  {}", jsonMessage);
+        try {
+            log.debug("Received status update: {}", jsonMessage);
 
-        Order order = objectMapper.readValue(jsonMessage, Order.class);
+            Order order = objectMapper.readValue(jsonMessage, Order.class);
+            myObjectRepository.save(order);
 
-        System.out.println("OrderService maping object " + order.getName() + " " + order.getCount());
-
-        myObjectRepository.save(order);
-
-        System.out.println("Object updated in DB");
+            log.info("Order updated: {} (count: {})", order.getName(), order.getCount());
+        } catch (JsonProcessingException e) {
+            log.error("Failed to parse order from JSON: {}", jsonMessage, e);
+            throw new RuntimeException("Deserialization error", e); // или кастомный эксепшн
+        }
     }
 
 }

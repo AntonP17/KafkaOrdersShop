@@ -4,6 +4,8 @@ package com.example.shipping.service;
 import com.example.shipping.model.ShippedOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -14,6 +16,7 @@ public class MyConsumer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Logger log = LoggerFactory.getLogger(MyConsumer.class);
 
     @Autowired
     public MyConsumer(KafkaTemplate<String, String> kafkaTemplate) {
@@ -22,25 +25,41 @@ public class MyConsumer {
     }
 
     @KafkaListener(topics = "payed_orders", groupId = "shippingGroup", containerFactory = "shippingGroupKafkaListenerContainerFactory")
-    public void listenPayedOrder(String jsonMessage) throws InterruptedException, JsonProcessingException {
+    public void listenPayedOrder(String jsonMessage) {
 
-        System.out.println("ShippingService listen order by payed_orders  " + jsonMessage);
+        try {
+            log.info("Processing shipping for order: {}", jsonMessage);
 
-        ShippedOrder order = objectMapper.readValue(jsonMessage, ShippedOrder.class);
+            ShippedOrder order = objectMapper.readValue(jsonMessage, ShippedOrder.class);
+            log.debug("Mapped order: {} (count: {})", order.getName(), order.getCount());
 
-        System.out.println("Shipping service maping object " + order.getName() + " " + order.getCount());
+            processShippingAsync(order);
 
-        Thread.sleep(5000);
+            order.setName("Shipped");
 
-        order.setName("Shipped");
+            String shippedJson = objectMapper.writeValueAsString(order);
 
-        System.out.println("Shipping service change object " + order.getName() + " " + order.getCount());
+            kafkaTemplate.send("sent_orders", shippedJson); // новый топик
+            kafkaTemplate.send("products_status", shippedJson);
 
-        String json = objectMapper.writeValueAsString(order);
+            log.info("Shipping processed for order ID: {}", order.getId());
 
-        kafkaTemplate.send("sent_orders", json); // новый топик
-        kafkaTemplate.send("products_status", json);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to parse order: {}", jsonMessage, e);
+            throw new RuntimeException("Shipping processing failed", e);
+        }
 
+    }
+
+    private void processShippingAsync(ShippedOrder order) {
+
+        try {
+            log.debug("Simulating shipping delay for order: {}", order.getId());
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("Shipping processing interrupted", e);
+        }
     }
 
 }
