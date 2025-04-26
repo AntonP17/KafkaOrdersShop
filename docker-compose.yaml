@@ -32,7 +32,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   orders:
-    build: /Orders
+    image: antonp17/kafkaordersshop20-orders:latest
     depends_on:
       - kafka
       - postgres
@@ -43,3 +43,24 @@ services:
       SPRING_DATASOURCE_PASSWORD: 297032
     ports:
       - "8080:8080"
+
+  payment:
+    image: antonp17/kafkaordersshop20-payment:latest
+    depends_on:
+      - kafka
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+
+  shipping:
+    image: antonp17/kafkaordersshop20-shipping:latest
+    depends_on:
+      - kafka
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+
+  notifications:
+    image: antonp17/kafkaordersshop20-notifications:lat
+    depends_on:
+      - kafka
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092

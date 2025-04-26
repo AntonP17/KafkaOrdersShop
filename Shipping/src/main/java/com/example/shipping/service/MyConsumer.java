@@ -33,7 +33,7 @@ public class MyConsumer {
             ShippedOrder order = objectMapper.readValue(jsonMessage, ShippedOrder.class);
             log.debug("Mapped order: {} (count: {})", order.getName(), order.getCount());
 
-            processShippingAsync(order);
+           // processShippingAsync(order);
 
             order.setName("Shipped");
 

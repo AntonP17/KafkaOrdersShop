@@ -34,7 +34,7 @@ public class MyConsumer {
             SendOrder order = objectMapper.readValue(jsonMessage, SendOrder.class);
             log.debug("Mapped order: {} (count: {})", order.getName(), order.getCount());
 
-            processNotificationsAsync(order);
+          //  processNotificationsAsync(order);
 
             order.setName("Sent");
 

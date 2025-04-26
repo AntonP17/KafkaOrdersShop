@@ -1,0 +1,5 @@
+spring.application.name=Notifications
+
+server.port=8084
+
+spring.kafka.bootstrap-servers=localhost:9092
