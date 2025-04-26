@@ -59,7 +59,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
 
   notifications:
-    image: antonp17/kafkaordersshop20-notifications:lat
+    image: antonp17/kafkaordersshop20-notifications:latest
     depends_on:
       - kafka
     environment:
