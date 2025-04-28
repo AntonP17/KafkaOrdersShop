@@ -33,7 +33,6 @@ public class MyConsumer {
             PayedOrder order = objectMapper.readValue(jsonMessage, PayedOrder.class);
             log.debug("Mapped order: {} (count: {})", order.getName(), order.getCount());
 
-          //  processPaymentAsync(order);
 
             order.setName("Payed");
 

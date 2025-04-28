@@ -32,14 +32,6 @@ public class KafkaConfig {
     }
 
     @Bean
-    public NewTopic productStatus(){
-        return TopicBuilder.name("product_status")
-                .partitions(3)
-                .replicas(3)
-                .build();
-    }
-
-    @Bean
     public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
@@ -47,8 +39,7 @@ public class KafkaConfig {
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
-        //configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092"); // для докер сети
-        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers); //для изолированноиго запуска (только первый проект должен работаьь обязательно
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         return new DefaultKafkaProducerFactory<>(configProps);
@@ -58,14 +49,14 @@ public class KafkaConfig {
     public ConcurrentKafkaListenerContainerFactory<String, String> notificationsGroupKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(notificationsGroupConsumerFactory());
+        factory.setConcurrency(3);
         return factory;
     }
 
     @Bean
     public ConsumerFactory<String, String> notificationsGroupConsumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
-        //configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092"); // для докер сети
-        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers); //для изолированноиго запуска (только первый проект должен работаьь обязательно
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "notificationsGroup");
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);

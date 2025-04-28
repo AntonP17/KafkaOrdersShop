@@ -47,8 +47,7 @@ public class KafkaConfig {
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
-        //configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092"); // для докер сети
-        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers); //для изолированноиго запуска (только первый проект должен работаьь обязательно
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         return new DefaultKafkaProducerFactory<>(configProps);
@@ -65,8 +64,7 @@ public class KafkaConfig {
     @Bean
     public ConsumerFactory<String, String> shippingGroupConsumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
-        //configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092"); // для докер сети для внешней localhost:9092
-        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers); //для изолированноиго запуска (только первый проект должен работаьь обязательно
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "shippingGroup");
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);

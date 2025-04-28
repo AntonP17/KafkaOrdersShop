@@ -37,9 +37,18 @@ public class KafkaConfig {
     public NewTopic newOrders() {
        return TopicBuilder.name("new_orders")
                .partitions(3)
-               .replicas(3)
+               .replicas(1)
                .build();
     }
+
+    @Bean
+    public NewTopic productStatus(){
+        return TopicBuilder.name("product_status")
+                .partitions(3)
+                .replicas(1)
+                .build();
+    }
+
 
     @Bean
     public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory) {
@@ -75,15 +84,6 @@ public class KafkaConfig {
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
         return new DefaultKafkaConsumerFactory<>(configProps);
-    }
-
-    // Exception handling . позже продолжу
-    private RetryTemplate retryTemplate() {
-        return RetryTemplate.builder()
-                .maxAttempts(3)  // Макс. число попыток
-                .fixedBackoff(1000)  // Интервал между попытками (мс)
-                .retryOn(IOException.class)  // Какие ошибки переотправлять
-                .build();
     }
 
 }

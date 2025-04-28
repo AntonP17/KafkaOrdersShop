@@ -47,8 +47,7 @@ public class KafkaConfig {
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
-        //configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092"); // для докер сети
-        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers); //для изолированноиго запуска (только первый проект должен работаьь обязательно
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 
@@ -66,8 +65,7 @@ public class KafkaConfig {
     @Bean
     public ConsumerFactory<String, String> paymentGroupConsumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
-        //configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092"); // для докер сети
-        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers); //для изолированноиго запуска (только первый проект должен работаьь обязательно
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "paymentGroup");
         configProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
